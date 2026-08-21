@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "codefriendly.hackertyper",
+  "name": "Hacker Typer",
+  "version": "0.9.0",
+  "author": "codefriendly",
+  "description": "A playful hacker typing simulator: choose a language, launch a terminal styled by your Omarchy theme, and press any keys to reveal convincing code.",
+  "kinds": [
+    "service",
+    "bar-widget",
+    "overlay"
+  ],
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml",
+    "overlay": "HackerTyper.qml"
+  },
+  "barWidget": {
+    "displayName": "Hacker Typer",
+    "description": "Choose a language and launch the themed Hacker Typer terminal",
+    "category": "Other",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
