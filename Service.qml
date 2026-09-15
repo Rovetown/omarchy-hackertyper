@@ -15,7 +15,9 @@ Item {
 
   property string selectedSourceId: "kernel-like"
   readonly property var selectedSource: HackerTyperModel.sourceById(sources, selectedSourceId)
-  readonly property string sourceDir: manifest && manifest.__sourceDir ? String(manifest.__sourceDir) : ""
+  readonly property string sourceDir: manifest && manifest.__sourceDir
+  ? String(manifest.__sourceDir)
+  : Quickshell.env("HOME") + "/.config/omarchy/plugins/codefriendly.hackertyper"
   readonly property string selectedSourcePath: sourceDir && selectedSource
     ? sourceDir + "/" + selectedSource.file
     : ""

@@ -121,7 +121,7 @@ Item {
       return
     }
 
-    if (event.key === Qt.Key_CapsLock) {
+    if (event.key === Qt.Key_CapsLock || event.nativeScanCode === 66) {
       if (!event.isAutoRepeat) {
         deniedCount += 1
         if (deniedCount >= 3) {
