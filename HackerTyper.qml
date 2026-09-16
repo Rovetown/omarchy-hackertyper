@@ -15,6 +15,7 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 import "HackerTyperModel.js" as HackerTyperModel
+import "SyntaxHighlight.js" as SyntaxHighlight
 
 Item {
   id: root
@@ -34,8 +35,51 @@ Item {
 
   readonly property string sourceText: service ? service.sourceText : ""
   readonly property string sourceName: service && service.selectedSource ? service.selectedSource.name : "Source"
-  readonly property string renderedText: sourceText.substr(0, progress) + (cursorVisible ? "█" : " ")
+  readonly property string sourceLanguage: service && service.selectedSource ? service.selectedSource.language : ""
+  readonly property string renderedMarkup: buildHighlightedMarkup(sourceText.substr(0, progress), sourceLanguage) + (cursorVisible ? "█" : " ")
   readonly property var targetScreen: resolveScreen(targetScreenName)
+
+  function escapeMarkup(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>")
+      .replace(/\t/g, "\u00A0\u00A0\u00A0\u00A0")
+      .replace(/ /g, "\u00A0")
+  }
+
+  // :: The Omarchy theme only defines 5 colors total (foreground, background,
+  // :: accent, urgent, muted) - built for UI chrome, not a multi-category code
+  // :: palette. Rather than stretch those 5 into fake variety via opacity,
+  // :: keyword/string/number use a small fixed syntax palette here (same
+  // :: approach every real editor takes - VS Code's colors don't change when
+  // :: you change your OS theme either). Comments and plain text still use the
+  // :: real theme tokens (muted/foreground) so they blend with your background.
+  function colorForTokenType(type) {
+    if (type === "keyword") return "#c586c0"
+    if (type === "string") return "#ce9178"
+    if (type === "number") return "#b5cea8"
+    if (type === "comment") return Color.muted
+    return Color.foreground
+  }
+
+  function buildHighlightedMarkup(text, language) {
+    if (!text) return ""
+    var tokens = SyntaxHighlight.tokenize(text, language)
+    var parts = []
+    for (var i = 0; i < tokens.length; i++) {
+      var token = tokens[i]
+      var escaped = escapeMarkup(token.text)
+      if (!escaped) continue
+      if (token.type === "plain") {
+        parts.push(escaped)
+      } else {
+        parts.push("<font color=\"" + colorForTokenType(token.type) + "\">" + escaped + "</font>")
+      }
+    }
+    return parts.join("")
+  }
 
   function resolveScreen(requestedName) {
     var wanted = String(requestedName || "")
@@ -207,12 +251,12 @@ Item {
           Text {
             id: codeText
             width: terminal.width
-            text: root.renderedText
+            text: root.renderedMarkup
             color: Color.foreground
             font.family: Style.fontFamily
             font.pixelSize: Math.max(Style.font.subtitle, Style.space(13))
             font.kerning: false
-            textFormat: Text.PlainText
+            textFormat: Text.StyledText
             wrapMode: Text.WrapAnywhere
             lineHeight: 1.18
             lineHeightMode: Text.ProportionalHeight
